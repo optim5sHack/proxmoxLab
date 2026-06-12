@@ -3,6 +3,7 @@
 # ️‍🔥 Instalación qbitorrent
 # actualizo
 apt update && sudo apt upgrade -y
+apt install sudo vim -y
 
 # instalar dependencias necesarias
 apt install qbittorrent-nox
