@@ -23,7 +23,7 @@ systemctl start ip6tables
 ip6tables -L -n
 systemctl restart iptables
 
-# lo ejecuto
+# pruebo la ejecución
 qbittorrent-nox
 
 # creo un usuario para el sistema sin permisos (eso evita que si una descarga tiene malware tenga permisos root)
