@@ -14,6 +14,8 @@ systemctl enable ssh
 systemctl restart ssh
 systemctl status ssh
 
+# a partir de aquí entro por ssh (putty)...
+
 # Configuro .bashrc (técnica/grisácea)
 vim ~/.bashrc
 -------------------------------------------------------------------------------------------
