@@ -264,4 +264,11 @@ systemctl restart iptables
 # Reiniciar sistema
 exec bash
 
+# reinicio para ver cambios de host
+reboot now
+
+
+# modifico el host
+panel proxmox > DNS > hostname
+
 
