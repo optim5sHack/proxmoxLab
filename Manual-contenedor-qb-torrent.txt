@@ -73,6 +73,7 @@ http://<ip-del-servidor>:8080
 
 # asocio la carpeta de descargas
 Tools > Options > Default save path: /Descargas
+  [x] Keep incomplete torrents in: /Descargas/incomplets
 
 ==========================================================================================
 ==========================================================================================
