@@ -1,0 +1,315 @@
+# actualizar paquetes y sistema
+apt update && apt upgrade -y && apt install vim
+
+# configuro ssh
+apt install -y openssh-server
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+cat <<EOF >> /etc/ssh/sshd_config
+Port 22
+PermitRootLogin yes
+AddressFamily inet
+ListenAddress 0.0.0.0
+EOF
+systemctl enable ssh
+systemctl restart ssh
+systemctl status ssh
+
+# Configuro .bashrc (técnica/grisácea)
+vim ~/.bashrc
+-------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------
+## Isaac 2025 - 2026.05.14
+## alias del servidor
+alias ls='ls -ha --color=auto --group-directories-first'
+alias la='ls $LS_OPTION -lhai --group-directories-first'
+alias _liberarespacioram='sudo sync; echo 1 | sudo tee /proc/sys/vm/drop_caches | echo "petición realizada correctamente." && echo "" && free -h'
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+alias grep='grep --color=auto'
+alias lsblk='lsblk -e7 -o NAME,MAJ:MIN,RM,SIZE,RO,TYPE,MOUNTPOINT,FSTYPE,MODEL,MODE,STATE,VENDOR,UUID'
+alias find='find ./ -name'
+alias dfi='df -hTi'
+
+## Cambiar diseño del prompt (técnica/grisácea)
+# -------------------------------------------------------------------
+# color prompt
+PS1='\[\e[0;90m\]\u 💥 |ಥ﹏ಥ |\[\e[1;35m\][optim5s.\H]\[\e[0m\] \[\e[1;37;41m\] \w \[\e[0m\]$: '
+
+# Opción técnica/grisácea
+export LS_COLORS="di=1;35:fi=0;37:ln=1;33:so=1;35:pi=1;33:bd=1;35:cd=1;35:or=1;31:mi=1;31:ex=1;31"
+#     di — directorios en rosa terminal técnico
+#     fi — archivos normales en gris medio
+#     ln — enlaces simbólicos en amarillo (bold yellow)
+#     so — sockets en púrpura oscuro (bold magenta)
+#     pi — pipes (tuberías) en amarillo (bold yellow)
+#     bd — dispositivos de bloque en gris carbón (bold black)
+#     cd — dispositivos de carácter en gris plomo (bold black)
+#     or — archivos rotos en rojo sangre oscuro (bold red)
+#     mi — archivos inexistentes en rojo sangre oscuro (bold red)
+#     ex — ejecutables en rojo brillante (bold red)
+
+# Editor por defecto
+export VISUAL=vim
+export EDITOR=vim
+-------------------------------------------------------------------------------------------
+
+# actualizo
+source ~/.bashrc
+
+# Configuro vimrc (técnica/grisácea)
+vim ~/.vimrc
+-------------------------------------------------------------------------------------------
+" Isaac 2025 - 2026.05.14
+set number                                    " Muestra números de línea
+set cursorline                                " Resalta línea actual
+set scrolloff=5                               " Mantiene 5 líneas arriba/abajo
+set incsearch                                 " Búsqueda incremental
+set hlsearch                                  " Resalta resultados búsqueda
+set ignorecase                                " Ignora mayúsculas/minúsculas
+set smartcase                                 " Caso sensible si hay mayúsculas
+set expandtab                                 " Usa espacios en lugar de tabs
+set tabstop=4                                 " Número de espacios que representa un tabulador
+set shiftwidth=4                              " Número de espacios para indentación automática
+set wildmenu                                  " Mejor autocompletado en la línea de comandos
+syntax on                                     " Activa el resaltado de sintaxis
+set background=dark                           " Tema oscuro para el fondo
+
+" Colores personalizados básicos para consola
+highlight Normal ctermfg=248 ctermbg=236      " Texto gris medio / fondo gris carbón
+highlight LineNr ctermfg=240                  " Números gris oscuro
+highlight CursorLine ctermbg=238              " Fondo línea cursor gris plomo
+highlight Keyword ctermfg=61                  " Palabras clave azul cobalto apagado
+highlight Function ctermfg=94                 " Funciones púrpura oscuro
+highlight Statement ctermfg=124               " Sentencias rojo sangre oscuro
+highlight Visual ctermbg=240                  " Selección gris oscuro
+highlight Comment ctermfg=3                   " Comentarios en amarillo
+
+set laststatus=2                              " Siempre mostrar línea de estado
+set noerrorbells                              " Sin sonidos de error
+set clipboard=unnamedplus                     " Usa portapapeles del sistema
+-------------------------------------------------------------------------------------------
+
+  # definir sistema de logs
+  vim /etc/logrotate.conf
+  -------------------------------------------------------------------------------------------
+  # logrotate.conf
+  # Isaac 2025 - 2026.05.14
+  weekly
+  rotate 52          # 52 semanas = 1 año
+  dateext
+  compress
+  notifempty
+  maxage 730         # elimina logs > 730 días (2 años)
+  create 640 root adm
+  include /etc/logrotate.d
+  -------------------------------------------------------------------------------------------
+
+  # reinicio servicio de logs
+  systemctl enable rsyslog
+  systemctl restart rsyslog
+
+# idioma y hora
+localectl set-locale LANG=en_US.UTF-8
+localectl
+timedatectl set-timezone Europe/Madrid
+
+# Dibujo con ASCII y mensaje de monitorización de bienvenida
+vim /etc/bash.bashrc
+-------------------------------------------------------------------------------------------
+...
+# ================= ASCII ART =================
+echo -e "\e[1;35m"
+echo ""
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠀⠀⠀⠀⠀⣤⣤⣤⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⣠⡶⢿⡇⢿⣿⡏⢳⣦⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⡛⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣧⣼⣿⣴⣋⡽⠮⠿⢭⣟⣏⣷⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣧⠘⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡼⣇⣿⡿⠶⣶⣿⣟⡛⣷⣿⢠⠙⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡈⣏⠇⢹⡀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡟⢹⠁⣿⠋⠉⢹⠉⠙⣿⡇⣾⣀⣾⠀⢀⣤⡀⢀⡀⠀⠀⢀⣠⣴⣾⠛⢻⡛⢻⡄⢀⣳⡀⢀⣠⠄⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣷⣾⢀⣿⡇⠀⠸⠀⠀⣿⣧⡽⠿⣟⣺⣭⠴⢿⡏⣩⣷⡾⢛⣭⣴⣿⣇⠘⣿⣷⣿⡛⠉⢻⣟⣷⠄⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⢿⣟⣿⣿⡦⣶⣪⡭⠿⣚⣫⣭⣽⣶⡄⠀⢸⡇⣿⡙⣿⣿⣿⣿⣿⣿⣆⠹⣿⣿⣷⡀⠀⢿⡉⠁⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⣤⣶⣿⠿⠛⣉⣭⣶⣾⣿⠿⠟⠛⠉⠉⢻⠀⢸⣷⣿⣇⢻⡿⣿⣿⣿⣿⠟⠀⠹⣿⣿⠃⠀⠘⣷⡀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣦⣼⣿⠿⠛⣋⡁⣼⢠⣿⡿⠛⠉⠁⠀⠀⢀⡀⢀⣴⣾⠀⢸⣿⡇⢻⡄⠙⠿⠻⠛⠁⠀⢀⣠⣽⣿⣇⡀⠀⠸⣧⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣾⠿⣛⣭⣴⡾⠟⠛⣧⣿⢸⡿⠀⠀⠀⠀⣰⣿⣿⣷⣾⣿⣿⠀⢸⡏⣇⢸⣷⡀⠀⢀⣠⣴⣾⠿⠛⣿⢻⣿⣹⡀⠀⢻⣆⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⡟⣦⠀⠀⠀⢀⡿⣵⡿⠛⠉⣡⣶⣤⣄⣿⣯⢸⣇⠀⠀⢠⣾⣿⡿⣿⣿⣿⣿⡿⠀⢸⡇⢻⡼⣿⣷⣶⠿⠛⠉⠀⠀⠀⠸⡇⣿⣿⣧⠀⠘⣿⡀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇⢹⠀⢀⣠⣼⣿⣿⠀⢀⣼⣿⣿⣿⣿⡇⣿⢸⣿⣀⣀⣿⡿⠿⠶⠚⠛⠉⠉⠀⠀⢸⡇⠀⢻⣾⣝⣿⡆⠀⢀⣠⡴⠖⠛⢻⡾⣿⣿⣆⠀⢹⡇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣇⣼⡾⠟⠋⣿⢻⣇⣤⣌⠻⢿⣿⣿⣿⠃⢿⠀⠉⠉⠁⠀⠀⠀⣀⣤⡤⠶⠶⠒⠚⣻⣷⣄⠈⣿⣿⣿⣿⡞⠉⠀⠀⠀⠀⠀⣿⢿⣿⣾⣋⣽⠇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣹⠏⠀⠀⠀⣿⢿⣿⣿⣯⡴⠾⠛⢋⣡⠶⠛⠛⠋⣉⣉⣉⣙⢻⣿⠀⠀⠀⠀⠀⢠⡟⠀⠈⠻⢦⣈⣿⣿⣧⠀⠀⢀⣠⣴⡾⢿⣿⣿⣿⣿⣿⡀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡟⣿⡟⠀⠀⠀⣿⠈⠋⠉⢀⣠⠴⣛⣩⣤⣶⣞⣭⣿⢿⣿⣿⣻⣼⣿⣆⣀⣤⣤⣴⣿⣄⣠⣶⣦⣀⣙⣿⣿⣿⡶⣿⠟⠋⣁⣶⠟⢻⣽⣿⣿⣿⠇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⢠⣿⣇⠀⠀⠀⢹⣠⡴⠖⢻⣷⢫⣿⣿⣿⣯⣿⣟⣿⣿⣭⣽⣿⡿⣿⣿⣿⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⠋⠉⣿⠀⢸⣿⣿⣿⣿⣷⡀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣼⣿⣿⣤⣴⣾⢿⡅⠀⣀⣾⢿⣿⣿⣿⣿⣿⣿⡿⣿⣷⣿⣿⣿⡇⣿⣿⡇⠀⠀⢸⣿⣿⡟⢿⣿⣿⣿⣿⣿⣣⣿⠁⣿⣀⣤⡿⠀⢀⣿⣿⣿⣿⣿⡇⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠻⣿⠛⠉⠀⠈⣿⠛⢽⣿⢻⣿⣿⢿⣿⣿⣿⡇⣿⠿⣶⣶⣚⣧⣿⣿⡇⠀⠀⣸⣿⣿⣿⣄⣈⢿⣿⢿⣷⣿⣿⠀⠉⠉⠀⠀⠀⠘⡇⣿⣿⣿⣿⡇⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⡀⣷⡆⠀⠀⠀⠸⣧⣻⣿⢸⣿⣿⡿⢿⣾⣻⡇⣿⣿⣿⣿⣿⣿⣿⠿⠷⠾⠛⠛⠿⢿⣿⣿⣿⣄⣿⠿⠋⢸⣿⠀⠀⠀⠀⠀⠀⠀⡇⣿⣿⣿⣿⣿⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⡇⣿⡇⠀⠀⠀⠀⣿⣿⣿⡾⢿⣿⣿⣿⣿⡶⠷⠾⠛⠛⠉⠁⢀⣠⠤⠴⠒⡆⢠⠀⢰⡉⠻⣿⣽⡏⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⡇⣿⡿⣿⣿⣿⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣧⣿⠿⢀⣀⣤⣴⣿⣿⣿⡷⠾⠛⠋⠉⢀⣀⣠⠤⠴⠒⠻⡆⢸⠀⠀⢀⡠⠇⠸⡄⠈⣇⠀⠈⡻⢦⡀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⡇⣿⣧⡘⠿⢻⡆"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣆⣿⣿⣿⣿⣿⡿⠛⣉⣀⡀⣠⠴⠒⠋⠉⠁⠀⠀⠀⠀⠀⡇⢸⣠⠴⣫⡄⠀⠀⡇⠀⢹⠀⠀⣿⠦⢿⡀⢸⡇⠀⠀⣀⣤⣤⣿⠀⡇⣿⣿⣿⣆⢸⡇"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⢿⡟⣽⣿⠀⣏⠁⠀⡇⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣇⠀⡖⣻⠋⠀⠀⠈⢻⠀⢈⡇⠀⠸⡄⠘⣧⢸⡇⠀⢸⣷⣾⣿⠏⠀⡇⣿⣿⣿⣿⢸⡇"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⠏⠛⠋⢡⣿⠀⠸⣿⣟⡃⣇⠀⠀⠀⠀⠀⣀⣠⡤⠶⠒⠋⠀⠛⠁⠀⣀⣤⣶⣿⣿⣿⣿⣷⣤⡈⠁⢻⡞⣿⠀⠈⠻⣴⠏⠀⠀⠿⢹⣿⣎⢻⣿⡇"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⡟⠀⠀⢀⡿⣿⠀⠀⠈⠳⡇⠻⠤⠶⠚⠋⠉⠁⠀⠀⠀⠀⠀⣀⣤⣶⣿⣿⣿⣿⣿⠿⠛⠻⣿⣿⣿⣷⣜⣷⣿⠀⠀⢀⣀⣤⣤⣶⣾⣶⣿⣿⠃⢸⡇"
+echo "⠀⠀⠀⠀⠀⠀⣀⣤⡶⠶⠖⠚⢛⠛⠳⢶⣼⡟⠀⠀⢀⣼⣹⣿⢀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⢀⣀⣠⡤⢤⣾⣿⣿⣿⡿⠿⠛⠉⠹⡇⠀⠀⣿⣿⣟⢿⣿⣿⠹⣶⣿⡿⠛⠻⣏⠀⠉⠉⡛⣿⡿⣾⡇"
+echo "⠀⠀⠀⢀⣴⠞⠋⢰⡇⢰⣿⢻⢻⢻⢶⣦⠙⣷⡀⠀⣸⢧⠟⢿⣿⣿⣿⣷⣶⣶⣤⣴⣲⡾⠿⠟⠒⠒⠛⡇⠙⣿⠉⠀⢧⠀⠀⠀⠀⣧⠀⠀⢸⣿⣿⡎⣿⠁⢀⣼⣏⢀⣠⣤⣸⣶⠀⠀⣿⣿⣿⠛⠁"
+echo "⠀⠀⠀⣾⠃⠀⣠⡬⣤⣼⣛⠾⣼⣞⡾⡟⠀⠘⣧⣠⣏⡞⠀⠈⠻⣿⡏⢹⡟⠛⠻⣿⠁⠀⠀⠀⠀⠀⠀⣇⠀⣿⠀⠀⢸⡄⠀⠀⠀⢸⠀⠀⠘⣿⣿⣇⣿⣴⡞⢣⣽⣿⣿⣿⣿⣿⠀⠀⣿⣿⡟⠀⠀"
+echo "⠀⠀⠀⣿⡶⣿⣿⣸⣿⣿⣿⠿⠷⠾⢽⣅⡲⠶⢻⣿⣼⢁⣠⣤⣶⣿⣿⠘⡇⠀⠀⢻⡆⠀⠀⠀⠀⠀⢀⣸⡀⢹⡇⠀⠈⡇⠀⠀⠀⠈⡇⠀⠀⢿⣿⣿⢹⣿⣤⣿⣿⣿⣿⡿⢿⣟⡀⠀⣿⣿⡇⠀⠀"
+echo "⠀⠀⠀⠈⠛⠿⢯⣜⣿⠏⠀⠀⠀⢀⡿⣨⣿⣶⣤⣿⣷⣯⣿⣿⣿⣿⣿⠀⡇⠀⠀⠐⡿⣦⣰⣒⣶⣿⣿⣿⣷⣾⣇⠀⠀⢻⠀⠀⠀⠀⢷⠀⠀⢸⣿⣿⣾⣿⣸⣿⡏⢠⠟⣠⣿⣿⣿⣦⡈⢹⡇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⢸⡟⣾⠄⠀⠀⣸⡇⣿⣿⣿⠟⠋⠛⢿⣿⣿⣿⣿⣿⡄⢻⠀⠀⠀⡇⠈⠙⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⢸⡆⠀⠀⠀⢸⡄⠀⠀⣿⣿⣇⣿⠛⠛⠻⣿⣺⣿⣿⣿⣿⣿⣿⡿⠃⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⣼⢧⡇⠀⠀⠀⣿⢸⣿⣿⡿⢦⣴⣿⣿⣷⡿⣿⡿⣿⡇⢸⡄⠀⠀⢹⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⣇⠀⠀⠀⠀⣇⠀⠀⢸⣿⣟⢿⡀⠀⠀⠈⠉⠀⠉⠉⠉⠁⠀⠀⠀⠀⠀"
+echo -e "\e[0m"
+
+# ================= INFO DEL SISTEMA =================
+echo "Información del sistema:"
+
+# Obtener información de la CPU
+CPU_INFO=$(grep -m1 'model name' /proc/cpuinfo | cut -d ':' -f2 | sed 's/^ //')
+# Obtener RAM libre
+RAM_LIBRE=$(free -h | awk '/^Mem:/ {print $7}')
+# Obtener espacio libre en la raíz
+DISK_LIBRE=$(df -h / | awk '$NF=="/" {print $4}')
+# Obtener uso de disco
+DISK_USED=$(df -h / | awk '$NF=="/" {print $3}')
+# Obtener total de disco
+DISK_TOTAL=$(df -h / | awk '$NF=="/" {print $2}')
+# Obtener uptime
+UPTIME_FMT=$(awk '{
+  printf "%d days, %d hours, %d minutes",
+  int($1/86400),
+  int(($1%86400)/3600),
+  int(($1%3600)/60)
+}' /proc/uptime)
+
+echo -e "\e[1;35mCPU: \e[0m$CPU_INFO"
+echo -e "\e[1;35mRAM libre: \e[0m$RAM_LIBRE"
+echo -e "\e[1;35mEspacio libre en /: \e[0m$DISK_LIBRE"
+echo -e "\e[1;35mEspacio usado en /: \e[0m$DISK_USED"
+echo -e "\e[1;35mEspacio total en /: \e[0m$DISK_TOTAL"
+echo -e "\e[1;35mTiempo desde el último arranque: \e[0m$UPTIME_FMT"
+
+uname -srm
+-------------------------------------------------------------------------------------------
+
+# recargo el archivo bash.bashrc
+source /etc/bash.bashrc
+source ~/.bashrc
+
+  # (Cron + ntpdate, actualización puntual) => para equipos de bajo rendimiento: Ejecuta ntpdate una vez al día mediante cron, sincronizando ntp. 
+  apt install -y ntpsec-ntpdate
+  /usr/sbin/ntpdate hora.roa.es
+  echo "00 6 * * * /usr/sbin/ntpdate -s hora.roa.es" | crontab -l 2>/dev/null | grep -v 'ntpdate -s hora.roa.es' | { cat; echo "00 6 * * * /usr/sbin/ntpdate -s hora.roa.es"; } | crontab -
+     # -l = lista crontab actual
+     # 2>/dev/null = evita error si no existe crontab previo
+     # grep -v = evita duplicados
+     # cat + echo = añade nueva línea
+
+# Deshabilitar IPv6
+echo -e "# Deshabilitamos IPv6\nnet.ipv6.conf.all.disable_ipv6 = 1\nnet.ipv6.conf.default.disable_ipv6 = 1\nnet.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# Archivo iptables
+apt install iptables iptables-persistent -y
+systemctl enable netfilter-persistent
+
+# iptables v4
+vim /etc/iptables/rules.v4
+-------------------------------------------------------------------------------------------
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+# SSH
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+# Permitir HTTP (puerto 80) y HTTPS (puerto 443) si es necesario un panel web
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+# Ejemplo:: Permitimos recibir respuestas DHCP si nuestra IP es dinámica
+#-A INPUT -p udp --sport 67 --dport 68 -j ACCEPT
+#-A OUTPUT -p udp --sport 68 --dport 67 -j ACCEPT
+# Ejemplo:: Permitir acceso al panel web de administración Greenbone
+#-A INPUT -p tcp --dport 9392 -j ACCEPT
+# Cerramos resto
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+-------------------------------------------------------------------------------------------
+
+# iptables v6
+vim /etc/iptables/rules.v6
+-------------------------------------------------------------------------------------------
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p ipv6-icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+# Ejemplo:: SSH
+#-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
+# Cerramos el resto
+-A INPUT -j REJECT --reject-with icmp6-adm-prohibited
+-A FORWARD -j REJECT --reject-with icmp6-adm-prohibited
+COMMIT
+-------------------------------------------------------------------------------------------
+
+# inicio servicio
+systemctl start iptables
+systemctl start ip6tables 
+ip6tables -L -n
+systemctl restart iptables
+
+# Reiniciar sistema
+exec bash
+
+
+# ⚠️ Por defecto los contenedores no se inicializar automáticamente, hay que realizar la siguiente configuración parra que se inicialice en al iniciar el servidor raíz
+# ⚠️ En caso de que se requiera que el contenedor se inicialice automáticamente
+vim /etc/lxc/<nombre_del_contenedor>.conf
+----------------------------------------------------------------
+...
+# Arranque automático del contenedor al iniciar el servidor
+lxc.start.auto = 1
+lxc.start.delay = 5      # opcional, segundos de espera para evitar que varios contenedores arranquen al mismo tiempo
+lxc.start.order = 1      # orden de arranque si tienes varios contenedores
+----------------------------------------------------------------
+
+
+## ⚠️ En el caso de que no se quira definir una ip estática, hay que realizar la configuración hasta aquí
+## ⚠️ En el caso qeu se requiera un ip estática, hay que realizar la siguiente configuración, ya que por defecto se configura por DHCP
+
+# defino una única ip estática para la máquina (dentro del nuevo contenedor)
+vim /etc/systemd/network/eth0.network
+----------------------------------------------------------------
+[Match]
+Name=eth0
+
+[Network]
+DHCP=false
+Address=192.168.1.101/24
+Gateway=192.168.1.1
+DNS=1.1.1.1 8.8.8.8
+
+[DHCPv4]
+UseDomains=true
+UseMTU=true
+
+#[DHCP]
+#ClientIdentifier=mac
+----------------------------------------------------------------
+
+# reinicio servicio 
+systemctl restart systemd-networkd
+reboot
+
+# paro e inicializo la máquina de nuevo y ya tendra la nueva ip estática
+kiribako
+4
+vm-qbitorrent
+2
+vm-qbitorrent
+3
+vm-qbitorrent
+
+# compruebo ip
+ip a
+
