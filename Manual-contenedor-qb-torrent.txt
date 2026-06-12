@@ -1,0 +1,127 @@
+==========================================================================================
+==========================================================================================
+# ️‍🔥 Instalación qbitorrent
+# actualizo
+apt update && sudo apt upgrade -y
+
+# instalar dependencias necesarias
+apt install qbittorrent-nox
+
+# configuracion de firerwall
+vim /etc/iptables/rules.v4
+----------------------------------------------------------------
+...
+# Permitir HTTP (puerto 80) y HTTPS (puerto 443) si es necesario un panel web
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 8096 -j ACCEPT
+...
+----------------------------------------------------------------
+
+# inicio servicio
+systemctl start iptables
+systemctl start ip6tables 
+ip6tables -L -n
+systemctl restart iptables
+
+# lo ejecuto
+qbittorrent-nox
+
+# creo un usuario para el sistema sin permisos (eso evita que si una descarga tiene malware tenga permisos root)
+adduser --disabled-password --gecos "" qbittorrent
+
+# creo la carpeta de Descargas
+mkdir -p /Descargas
+chown qbittorrent:qbittorrent /Descargas
+
+# ejecuto la configuración para generar el despliegue
+sudo -u qbittorrent qbittorrent-nox
+
+# creo un servicio para habilitarlo de manera sencilla en segundo plano 
+vim /etc/systemd/system/qbittorrent-nox.service
+----------------------------------------------------------------
+[Unit]
+Description=qBittorrent-nox service
+After=network.target
+
+[Service]
+User=qbittorrent
+ExecStart=/usr/bin/qbittorrent-nox
+Restart=on-failure
+RestartSec=5
+Nice=10
+UMask=002
+
+[Install]
+WantedBy=multi-user.target
+----------------------------------------------------------------
+
+# recargar systemd y habilitar el servicio
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+
+# Iniciar el servicio
+sudo systemctl start qbittorrent-nox
+sudo systemctl enable qbittorrent-nox
+sudo systemctl status qbittorrent-nox
+
+# al crear los torrent tengo que indicarles la carpeta de descarga en /Descargas
+# configuración por interface
+# servidor web
+http://<ip-del-servidor>:8080
+-  Usuario: admin
+-  Contraseña: adminadmin
+
+# asocio la carpeta de descargas
+Tools > Options > Default save path: /Descargas
+
+==========================================================================================
+==========================================================================================
+# 😍 configuración de búsqueda automática en qbitorrent
+
+# search plugins confiables para peliculasn (2026/02/01)
+https://github.com/qbittorrent/search-plugins/wiki/Unofficial-search-plugins
++---------------------------+------------+--------+------------------------------------------------------------------------------------------------+
+| Plugin                    | qBittorrent| Python | Comentarios                                                                                    |
++---------------------------+------------+--------+------------------------------------------------------------------------------------------------+
+| CalidadTorrent            | 5.0.x      | 3.9.x  | Actualizado 2024, especializado en cine y series, buena reputación                             |
+| DivxTotal                 | 5.0.x      | 3.9.x  | Actualizado 2024, muchos torrents de películas modernas en español                             |
+| Dontorrent (BurningMop)   | 5.0.x      | 3.9.x  | Español, actualizado, confiable                                                                |
+| TomaDivx                  | 5.0.x      | 3.9.x  | Español, películas modernas y repacks Películas modernas en inglés, gran calidad, muy conocido |
+| Elitetorrent              | 4.6.7      | 3.9.5  | Español, enfocado en películas modernas                                                        |
+| naranjatorrent            | 5.0.x      | 3.9.x  | Español, actualizado 2024                                                                      |
+| Cpasbien                  | 4.5.x      | 3.11.x | Español, estrenos y series recientes                                                           |
+| YTS                       | 4.6.2      | 3.12   | Películas modernas en buena calidad y sin archivos gigantes, pero no es el sitio para español  |
+| Torrenflix                | 5.0.x      | 3.9.x  | Especializado en películas y series modernas, pero no es el sitio para español                 |
+| ThePirateBay              | 4.3.x      | 3.8.5  | Muy conocido, estrenos recientes, inglés                                                       |
+| The RarBg                 | 4.6.x      | 3.9.x  | Películas y series modernas, buena calidad, inglés                                             |
+| SolidTorrents.to          | 4.6.x      | 3.9.x  | Películas modernas en inglés, buena reputación                                                 |
+| Torrent Downloads Pro     | 4.6.x      | 3.9.x  | Inglés, contenido reciente y confiable                                                         |
+| MaxiTorrent               | 4.3.x      | 3.5.0  | Inglés, películas y series antiguas y recientes                                                |
++---------------------------+------------+--------+------------------------------------------------------------------------------------------------+
+
+==========================================================================================
+==========================================================================================
+## 🎥 Instalar JellyFilm en el servidor
+# Actualizar repos
+sudo apt update && sudo apt upgrade -y
+
+# Añadir repositorio oficial de Jellyfin
+apt install apt-transport-https ca-certificates gnupg -y
+apt install wget gnupg -y
+apt install lsb-release ca-certificates wget gnupg -y
+
+wget -O- https://repo.jellyfin.org/jellyfin_team.gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/jellyfin-archive-keyring.gpg --yes
+
+echo "deb [signed-by=/usr/share/keyrings/jellyfin-archive-keyring.gpg] https://repo.jellyfin.org/debian $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/jellyfin.list
+
+# Instalar Jellyfin
+sudo apt update
+sudo apt install jellyfin -y
+
+# Iniciar y habilitar el servicio
+sudo systemctl enable --now jellyfin
+
+# Accedes desde el navegador
+http://IP_DEL_CONTENEDOR:8096
+
+# 🥳 Ahora solo falta la configuración vía web, una vez completada la configuaración y marcada la carpeta donde descarga las peliculas qbitorrent /Descargas , solo tengo que instala JetFil en el cliente que será el televisor y seguir las instrucciones marcando la ip del servidor como la del contendor
