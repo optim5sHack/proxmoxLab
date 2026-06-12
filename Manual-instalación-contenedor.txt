@@ -92,24 +92,25 @@ set noerrorbells                              " Sin sonidos de error
 set clipboard=unnamedplus                     " Usa portapapeles del sistema
 -------------------------------------------------------------------------------------------
 
-  # definir sistema de logs
-  vim /etc/logrotate.conf
-  -------------------------------------------------------------------------------------------
-  # logrotate.conf
-  # Isaac 2025 - 2026.05.14
-  weekly
-  rotate 52          # 52 semanas = 1 año
-  dateext
-  compress
-  notifempty
-  maxage 730         # elimina logs > 730 días (2 años)
-  create 640 root adm
-  include /etc/logrotate.d
-  -------------------------------------------------------------------------------------------
+# definir sistema de logs
+vim /etc/logrotate.conf
+-------------------------------------------------------------------------------------------
+# logrotate.conf
+# Isaac 2025 - 2026.05.14
+weekly
+rotate 52          # 52 semanas = 1 año
+dateext
+compress
+notifempty
+maxage 730         # elimina logs > 730 días (2 años)
+create 640 root adm
+include /etc/logrotate.d
+-------------------------------------------------------------------------------------------
 
-  # reinicio servicio de logs
-  systemctl enable rsyslog
-  systemctl restart rsyslog
+# reinicio servicio de logs
+apt install rsyslog -y
+systemctl enable rsyslog
+systemctl restart rsyslog
 
 # idioma y hora
 localectl set-locale LANG=en_US.UTF-8
@@ -263,55 +264,4 @@ systemctl restart iptables
 # Reiniciar sistema
 exec bash
 
-
-# ⚠️ Por defecto los contenedores no se inicializar automáticamente, hay que realizar la siguiente configuración parra que se inicialice en al iniciar el servidor raíz
-# ⚠️ En caso de que se requiera que el contenedor se inicialice automáticamente
-vim /etc/lxc/<nombre_del_contenedor>.conf
-----------------------------------------------------------------
-...
-# Arranque automático del contenedor al iniciar el servidor
-lxc.start.auto = 1
-lxc.start.delay = 5      # opcional, segundos de espera para evitar que varios contenedores arranquen al mismo tiempo
-lxc.start.order = 1      # orden de arranque si tienes varios contenedores
-----------------------------------------------------------------
-
-
-## ⚠️ En el caso de que no se quira definir una ip estática, hay que realizar la configuración hasta aquí
-## ⚠️ En el caso qeu se requiera un ip estática, hay que realizar la siguiente configuración, ya que por defecto se configura por DHCP
-
-# defino una única ip estática para la máquina (dentro del nuevo contenedor)
-vim /etc/systemd/network/eth0.network
-----------------------------------------------------------------
-[Match]
-Name=eth0
-
-[Network]
-DHCP=false
-Address=192.168.1.101/24
-Gateway=192.168.1.1
-DNS=1.1.1.1 8.8.8.8
-
-[DHCPv4]
-UseDomains=true
-UseMTU=true
-
-#[DHCP]
-#ClientIdentifier=mac
-----------------------------------------------------------------
-
-# reinicio servicio 
-systemctl restart systemd-networkd
-reboot
-
-# paro e inicializo la máquina de nuevo y ya tendra la nueva ip estática
-kiribako
-4
-vm-qbitorrent
-2
-vm-qbitorrent
-3
-vm-qbitorrent
-
-# compruebo ip
-ip a
 
