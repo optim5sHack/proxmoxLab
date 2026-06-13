@@ -1,0 +1,114 @@
+## Mis instalaciones, paquetes
+
+## 🖼️ exiftool
+# ver metadatos de una imágen
+apt install exiftool
+wget <url>
+exiftool <imagen_descargada>
+
+## 📧 zphisher 
+# con zphisher voy a controlar y crear login de páginas conocidas exactamente iguales
+git clone https://github.com/htr-tech/zphisher.git
+cd zphisher/
+bash zphisher.sh
+
+## 💃 samba (conocer usuario)
+# instalo
+sudo apt update
+sudo apt install -y perl smbclient nmap
+# Descargar enum4linux
+git clone https://github.com/CiscoCXSecurity/enum4linux.git
+cd enum4linux
+# auditoría de SMB en red
+perl enum4linux.pl 192.168.10.40
+perl enum4linux.pl -u usuario -p contraseña 10.1.10.30
+
+## 🎩 rockyou.txt (diccionarios)
+---------------------------------------------------------------------------------------------------
+# descargo el dicionario rockyou.txt
+apt install wget -y
+cd /pentesting
+wget rockyou.txt https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
+# compruebo la contraseña contra el archivo rockyou.txt
+grep -Fx "123456" rockyou.txt && echo "Comprometida" || echo "No encontrada"
+
+## jonh
+# instalo jonh
+sudo apt install john -y
+
+# otra forma pero codificado
+touch /hash.txt
+echo -n "password123" | md5sum
+  # 482c811da5d5b4bc6d497ffa98491e38
+echo "482c811da5d5b4bc6d497ffa98491e38" > /pentesting/hash.txt
+echo "482c811da5d5b4bc6d497ffa98491e38" > /pentesting/hash.txt
+
+# organizo
+cd /pentesting
+mkdir diccionarios
+mv /pentesting/rockyou.txt /pentesting/diccionarios/rockyou.txt 
+
+# descifrar
+# john --format=md5crypt --wordlist=/pentesting/diccionarios/rockyou.txt /PENTESTING/hash.txt
+john --wordlist=/pentesting/diccionarios/rockyou.txt  /pentesting/hash.txt
+
+# muestra las contraseñas que John the Ripper ha descifrado exitosamente
+john --show hash.txt
+---------------------------------------------------------------------------------------------------
+
+### 🎩 kaonashi.txt (diccionarios)
+---------------------------------------------------------------------------------------------------
+# instalo john compilado
+sudo apt update
+sudo apt install john -y 
+cd run/bin/
+git clone https://github.com/openwall/john.git
+cd john/src
+./configure && make -s clean && make -sj4
+cd ~
+vim .bashrc
+------------------------------------------------------------
+...
+# alias pentesting
+alias john="/run/bin/john/run/john"
+...
+------------------------------------------------------------
+
+Descargar desde Windows kaonashi.txt
+https://github.com/kaonashi-passwords/Kaonashi
+
+# desde windows envio el archivo al servidor
+scp .\kaonashi.7z user@ip:/pentesting/diccionarios/
+
+# instalo en el servidor 7zip para descomprimirlo
+apt install p7zip-full
+7z x kaonashi.7z
+
+# ejecuto el archivo con hascat o jonh...etc
+# hashcat -m 0 -a 0 PENTESTING/hash.txt PENTESTING/DICCIONARIOS/kaonashi.txt
+# utilizo jonh según el formato
+john --wordlist=/pentesting/diccionarios/kaonashi.txt --format=descrypt /pentesting/hash.txt
+john --wordlist=/pentesting/diccionarios/kaonashi.txt --format=md5crypt /pentesting/hash.txt
+john --session=yescrypt_run --wordlist=/pentesting/diccionarios/kaonashi.txt --rules --format=crypt /pentesting/hash.txt
+john --wordlist=/pentesting/diccionarios/kaonashi.txt --format=raw-sha256 /pentesting/hash.txt
+john --wordlist=/pentesting/diccionarios/kaonashi.txt --format=sha512crypt /pentesting/hash.txt
+
+# si no funciona a la primera puedo probar con reglas, agregando el encriptado necesario (con esta forma tarda muchísimo más...)
+# las reglas lo que va hacer es modificar automáticamente las palabras de tu wordlist y generar variantes que podrían coincidir con la contraseña real (intenta agrega números al final y al principio de las contraseñas... etc )
+john --wordlist=/aptelliot/pruebas/kaonashi.txt --rules --format=raw-sha256 /aptelliot/pruebas/hash.txt
+
+# - 
+
+# ⚠️ Creo alias para automatizar en máquina de pentesting
+# de esta manera solo agrego en /PENTESTING/hash.txt el hash y ejecuto el alias directamente
+vim .bashrc
+------------------------------------------------------------
+## alias de pentesting
+alias _kaonashi_descrypt='john --wordlist=/PENTESTING/DICCIONARIOS/kaonashi.txt --format=descrypt /PENTESTING/hash.txt'
+alias _kaonashi_md5='john --wordlist=/PENTESTING/DICCIONARIOS/kaonashi.txt --format=md5crypt /PENTESTING/hash.txt'
+alias _kaonashi_crypt_rules='john --session=yescrypt_run --wordlist=/PENTESTING/DICCIONARIOS/kaonashi.txt --rules --format=crypt /PENTESTING/hash.txt'
+alias _kaonashi_sha256='john --wordlist=/PENTESTING/DICCIONARIOS/kaonashi.txt --format=raw-sha256 /PENTESTING/hash.txt'
+alias _kaonashi_sha512='john --wordlist=/PENTESTING/DICCIONARIOS/kaonashi.txt --format=sha512crypt /PENTESTING/hash.txt'
+------------------------------------------------------------
+source .bashrc
+---------------------------------------------------------------------------------------------------
