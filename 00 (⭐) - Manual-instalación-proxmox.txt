@@ -1,0 +1,382 @@
+# actualizar paquetes y sistema
+apt update && apt upgrade -y
+
+# instalar paquetes principales
+apt install -y \
+    nmap tcpdump \
+    iputils-ping lm-sensors iproute2 sudo vim iproute2 curl btop iftop lsof \
+    lsb-release wget sysstat snmp snmpd tcpdump \
+    ngrep iptraf-ng plocate tar gzip tree ca-certificates \
+    screen man-db mailutils dnsutils rsyslog locales snmp snmpd smartmontools
+  
+apt install lm-sensors -y
+
+# cambiar host
+vim /etc/hostname             # pve
+vim /etc/hosts                # pve
+
+# configurar dns 
+cat /etc/resolv.conf
+    nameserver 8.8.8.8
+    nameserver 8.8.4.4
+
+# Configuro .bashrc (técnica/grisácea)
+vim ~/.bashrc
+-------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------
+...
+## alias del servidor
+alias ls='ls -ha --color=auto --group-directories-first'
+alias la='ls $LS_OPTION -lhai --group-directories-first'
+alias _liberarespacioram='sudo sync; echo 1 | sudo tee /proc/sys/vm/drop_caches | echo "petición realizada correctamente." && echo "" && free -h'
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+alias grep='grep --color=auto'
+alias lsblk='lsblk -e7 -o NAME,MAJ:MIN,RM,SIZE,RO,TYPE,MOUNTPOINT,FSTYPE,MODEL,MODE,STATE,VENDOR,UUID'
+alias find='find ./ -name'
+alias dfi='df -hTi'
+
+## Cambiar diseño del prompt (técnica/grisácea)
+# -------------------------------------------------------------------
+# color prompt
+# PS1='\[\e[0;90m\]最適\[\e[1;32m\][grafometal.\H]\[\e[0m\] \[\e[1;37;41m\] \w \[\e[0m\]$: '
+PS1='\[\e[0;90m\]\u 🌑 |ಠ益ಠ |\[\e[96m\][\H]\[\e[0m\] \[\e[1;37;41m\] \w \[\e[0m\]$: '
+
+# Opción técnica/grisácea
+#export LS_COLORS="di=1;32:fi=0;37:ln=1;35:so=0;38;5;208:pi=0;34:bd=0;33:cd=0;33:or=0;31:mi=0;31:ex=1;31"
+export LS_COLORS="di=1;30:fi=0;37:ln=1;33:so=1;35:pi=1;33:bd=1;30:cd=1;30:or=1;31:mi=1;31:ex=1;31"
+#     di — directorios en gris oscuro técnico (bold black)
+#     fi — archivos normales en gris medio
+#     ln — enlaces simbólicos en amarillo (bold yellow)
+#     so — sockets en púrpura oscuro (bold magenta)
+#     pi — pipes (tuberías) en amarillo (bold yellow)
+#     bd — dispositivos de bloque en gris carbón (bold black)
+#     cd — dispositivos de carácter en gris plomo (bold black)
+#     or — archivos rotos en rojo sangre oscuro (bold red)
+#     mi — archivos inexistentes en rojo sangre oscuro (bold red)
+#     ex — ejecutables en rojo brillante (bold red)
+
+# Editor por defecto
+export VISUAL=vim
+export EDITOR=vim
+...
+-------------------------------------------------------------------------------------------
+
+# actualizo
+source ~/.bashrc
+
+# Configuro vimrc (técnica/grisácea)
+vim ~/.vimrc
+-------------------------------------------------------------------------------------------
+set number                                    " Muestra números de línea
+set cursorline                                " Resalta línea actual
+set scrolloff=5                               " Mantiene 5 líneas arriba/abajo
+set incsearch                                 " Búsqueda incremental
+set hlsearch                                  " Resalta resultados búsqueda
+set ignorecase                                " Ignora mayúsculas/minúsculas
+set smartcase                                 " Caso sensible si hay mayúsculas
+set expandtab                                 " Usa espacios en lugar de tabs
+set tabstop=4                                 " Número de espacios que representa un tabulador
+set shiftwidth=4                              " Número de espacios para indentación automática
+set wildmenu                                  " Mejor autocompletado en la línea de comandos
+syntax on                                     " Activa el resaltado de sintaxis
+set background=dark                           " Tema oscuro para el fondo
+
+" Colores personalizados básicos para consola
+highlight Normal ctermfg=248 ctermbg=236      " Texto gris medio / fondo gris carbón
+highlight LineNr ctermfg=240                  " Números gris oscuro
+highlight CursorLine ctermbg=238              " Fondo línea cursor gris plomo
+highlight Keyword ctermfg=61                  " Palabras clave azul cobalto apagado
+highlight Function ctermfg=94                 " Funciones púrpura oscuro
+highlight Statement ctermfg=124               " Sentencias rojo sangre oscuro
+highlight Visual ctermbg=240                  " Selección gris oscuro
+highlight Comment ctermfg=3                   " Comentarios en amarillo
+
+set laststatus=2                              " Siempre mostrar línea de estado
+set noerrorbells                              " Sin sonidos de error
+set clipboard=unnamedplus                     " Usa portapapeles del sistema
+-------------------------------------------------------------------------------------------
+
+# definir sistema de logs
+cp /etc/logrotate.conf /etc/logrotate.conf.old
+vim /etc/logrotate.conf
+-------------------------------------------------------------------------------------------
+# logrotate.conf - Elliot 2025
+weekly
+rotate 52          # 52 semanas = 1 año
+dateext
+compress
+notifempty
+maxage 730         # elimina logs > 730 días (2 años)
+create 640 root adm
+include /etc/logrotate.d
+-------------------------------------------------------------------------------------------
+
+# reinicio servicio de logs
+systemctl enable rsyslog
+systemctl restart rsyslog
+
+# idioma y hora
+localectl set-locale LANG=en_US.UTF-8
+localectl
+timedatectl set-timezone Europe/Madrid
+
+# Dibujo con ASCII y mensaje de monitorización de bienvenida
+vim /etc/bash.bashrc
+-------------------------------------------------------------------------------------------
+...
+# ================= ASCII ART =================
+echo ""
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠀⠀⠀⠀⠀⣤⣤⣤⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⣠⡶⢿⡇⢿⣿⡏⢳⣦⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⡛⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣧⣼⣿⣴⣋⡽⠮⠿⢭⣟⣏⣷⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣧⠘⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡼⣇⣿⡿⠶⣶⣿⣟⡛⣷⣿⢠⠙⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡈⣏⠇⢹⡀⠀⠀⠀⠀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡟⢹⠁⣿⠋⠉⢹⠉⠙⣿⡇⣾⣀⣾⠀⢀⣤⡀⢀⡀⠀⠀⢀⣠⣴⣾⠛⢻⡛⢻⡄⢀⣳⡀⢀⣠⠄⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣷⣾⢀⣿⡇⠀⠸⠀⠀⣿⣧⡽⠿⣟⣺⣭⠴⢿⡏⣩⣷⡾⢛⣭⣴⣿⣇⠘⣿⣷⣿⡛⠉⢻⣟⣷⠄⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⢿⣟⣿⣿⡦⣶⣪⡭⠿⣚⣫⣭⣽⣶⡄⠀⢸⡇⣿⡙⣿⣿⣿⣿⣿⣿⣆⠹⣿⣿⣷⡀⠀⢿⡉⠁⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⣤⣶⣿⠿⠛⣉⣭⣶⣾⣿⠿⠟⠛⠉⠉⢻⠀⢸⣷⣿⣇⢻⡿⣿⣿⣿⣿⠟⠀⠹⣿⣿⠃⠀⠘⣷⡀⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣦⣼⣿⠿⠛⣋⡁⣼⢠⣿⡿⠛⠉⠁⠀⠀⢀⡀⢀⣴⣾⠀⢸⣿⡇⢻⡄⠙⠿⠻⠛⠁⠀⢀⣠⣽⣿⣇⡀⠀⠸⣧⠀⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣾⠿⣛⣭⣴⡾⠟⠛⣧⣿⢸⡿⠀⠀⠀⠀⣰⣿⣿⣷⣾⣿⣿⠀⢸⡏⣇⢸⣷⡀⠀⢀⣠⣴⣾⠿⠛⣿⢻⣿⣹⡀⠀⢻⣆⠀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⡟⣦⠀⠀⠀⢀⡿⣵⡿⠛⠉⣡⣶⣤⣄⣿⣯⢸⣇⠀⠀⢠⣾⣿⡿⣿⣿⣿⣿⡿⠀⢸⡇⢻⡼⣿⣷⣶⠿⠛⠉⠀⠀⠀⠸⡇⣿⣿⣧⠀⠘⣿⡀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇⢹⠀⢀⣠⣼⣿⣿⠀⢀⣼⣿⣿⣿⣿⡇⣿⢸⣿⣀⣀⣿⡿⠿⠶⠚⠛⠉⠉⠀⠀⢸⡇⠀⢻⣾⣝⣿⡆⠀⢀⣠⡴⠖⠛⢻⡾⣿⣿⣆⠀⢹⡇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣇⣼⡾⠟⠋⣿⢻⣇⣤⣌⠻⢿⣿⣿⣿⠃⢿⠀⠉⠉⠁⠀⠀⠀⣀⣤⡤⠶⠶⠒⠚⣻⣷⣄⠈⣿⣿⣿⣿⡞⠉⠀⠀⠀⠀⠀⣿⢿⣿⣾⣋⣽⠇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣹⠏⠀⠀⠀⣿⢿⣿⣿⣯⡴⠾⠛⢋⣡⠶⠛⠛⠋⣉⣉⣉⣙⢻⣿⠀⠀⠀⠀⠀⢠⡟⠀⠈⠻⢦⣈⣿⣿⣧⠀⠀⢀⣠⣴⡾⢿⣿⣿⣿⣿⣿⡀⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡟⣿⡟⠀⠀⠀⣿⠈⠋⠉⢀⣠⠴⣛⣩⣤⣶⣞⣭⣿⢿⣿⣿⣻⣼⣿⣆⣀⣤⣤⣴⣿⣄⣠⣶⣦⣀⣙⣿⣿⣿⡶⣿⠟⠋⣁⣶⠟⢻⣽⣿⣿⣿⠇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⢠⣿⣇⠀⠀⠀⢹⣠⡴⠖⢻⣷⢫⣿⣿⣿⣯⣿⣟⣿⣿⣭⣽⣿⡿⣿⣿⣿⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⠋⠉⣿⠀⢸⣿⣿⣿⣿⣷⡀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣼⣿⣿⣤⣴⣾⢿⡅⠀⣀⣾⢿⣿⣿⣿⣿⣿⣿⡿⣿⣷⣿⣿⣿⡇⣿⣿⡇⠀⠀⢸⣿⣿⡟⢿⣿⣿⣿⣿⣿⣣⣿⠁⣿⣀⣤⡿⠀⢀⣿⣿⣿⣿⣿⡇⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠻⣿⠛⠉⠀⠈⣿⠛⢽⣿⢻⣿⣿⢿⣿⣿⣿⡇⣿⠿⣶⣶⣚⣧⣿⣿⡇⠀⠀⣸⣿⣿⣿⣄⣈⢿⣿⢿⣷⣿⣿⠀⠉⠉⠀⠀⠀⠘⡇⣿⣿⣿⣿⡇⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⡀⣷⡆⠀⠀⠀⠸⣧⣻⣿⢸⣿⣿⡿⢿⣾⣻⡇⣿⣿⣿⣿⣿⣿⣿⠿⠷⠾⠛⠛⠿⢿⣿⣿⣿⣄⣿⠿⠋⢸⣿⠀⠀⠀⠀⠀⠀⠀⡇⣿⣿⣿⣿⣿⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⡇⣿⡇⠀⠀⠀⠀⣿⣿⣿⡾⢿⣿⣿⣿⣿⡶⠷⠾⠛⠛⠉⠁⢀⣠⠤⠴⠒⡆⢠⠀⢰⡉⠻⣿⣽⡏⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⡇⣿⡿⣿⣿⣿⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣧⣿⠿⢀⣀⣤⣴⣿⣿⣿⡷⠾⠛⠋⠉⢀⣀⣠⠤⠴⠒⠻⡆⢸⠀⠀⢀⡠⠇⠸⡄⠈⣇⠀⠈⡻⢦⡀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⡇⣿⣧⡘⠿⢻⡆"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣆⣿⣿⣿⣿⣿⡿⠛⣉⣀⡀⣠⠴⠒⠋⠉⠁⠀⠀⠀⠀⠀⡇⢸⣠⠴⣫⡄⠀⠀⡇⠀⢹⠀⠀⣿⠦⢿⡀⢸⡇⠀⠀⣀⣤⣤⣿⠀⡇⣿⣿⣿⣆⢸⡇"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⢿⡟⣽⣿⠀⣏⠁⠀⡇⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣇⠀⡖⣻⠋⠀⠀⠈⢻⠀⢈⡇⠀⠸⡄⠘⣧⢸⡇⠀⢸⣷⣾⣿⠏⠀⡇⣿⣿⣿⣿⢸⡇"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⠏⠛⠋⢡⣿⠀⠸⣿⣟⡃⣇⠀⠀⠀⠀⠀⣀⣠⡤⠶⠒⠋⠀⠛⠁⠀⣀⣤⣶⣿⣿⣿⣿⣷⣤⡈⠁⢻⡞⣿⠀⠈⠻⣴⠏⠀⠀⠿⢹⣿⣎⢻⣿⡇"
+echo "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⡟⠀⠀⢀⡿⣿⠀⠀⠈⠳⡇⠻⠤⠶⠚⠋⠉⠁⠀⠀⠀⠀⠀⣀⣤⣶⣿⣿⣿⣿⣿⠿⠛⠻⣿⣿⣿⣷⣜⣷⣿⠀⠀⢀⣀⣤⣤⣶⣾⣶⣿⣿⠃⢸⡇"
+echo "⠀⠀⠀⠀⠀⠀⣀⣤⡶⠶⠖⠚⢛⠛⠳⢶⣼⡟⠀⠀⢀⣼⣹⣿⢀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⢀⣀⣠⡤⢤⣾⣿⣿⣿⡿⠿⠛⠉⠹⡇⠀⠀⣿⣿⣟⢿⣿⣿⠹⣶⣿⡿⠛⠻⣏⠀⠉⠉⡛⣿⡿⣾⡇"
+echo "⠀⠀⠀⢀⣴⠞⠋⢰⡇⢰⣿⢻⢻⢻⢶⣦⠙⣷⡀⠀⣸⢧⠟⢿⣿⣿⣿⣷⣶⣶⣤⣴⣲⡾⠿⠟⠒⠒⠛⡇⠙⣿⠉⠀⢧⠀⠀⠀⠀⣧⠀⠀⢸⣿⣿⡎⣿⠁⢀⣼⣏⢀⣠⣤⣸⣶⠀⠀⣿⣿⣿⠛⠁"
+echo "⠀⠀⠀⣾⠃⠀⣠⡬⣤⣼⣛⠾⣼⣞⡾⡟⠀⠘⣧⣠⣏⡞⠀⠈⠻⣿⡏⢹⡟⠛⠻⣿⠁⠀⠀⠀⠀⠀⠀⣇⠀⣿⠀⠀⢸⡄⠀⠀⠀⢸⠀⠀⠘⣿⣿⣇⣿⣴⡞⢣⣽⣿⣿⣿⣿⣿⠀⠀⣿⣿⡟⠀⠀"
+echo "⠀⠀⠀⣿⡶⣿⣿⣸⣿⣿⣿⠿⠷⠾⢽⣅⡲⠶⢻⣿⣼⢁⣠⣤⣶⣿⣿⠘⡇⠀⠀⢻⡆⠀⠀⠀⠀⠀⢀⣸⡀⢹⡇⠀⠈⡇⠀⠀⠀⠈⡇⠀⠀⢿⣿⣿⢹⣿⣤⣿⣿⣿⣿⡿⢿⣟⡀⠀⣿⣿⡇⠀⠀"
+echo "⠀⠀⠀⠈⠛⠿⢯⣜⣿⠏⠀⠀⠀⢀⡿⣨⣿⣶⣤⣿⣷⣯⣿⣿⣿⣿⣿⠀⡇⠀⠀⠐⡿⣦⣰⣒⣶⣿⣿⣿⣷⣾⣇⠀⠀⢻⠀⠀⠀⠀⢷⠀⠀⢸⣿⣿⣾⣿⣸⣿⡏⢠⠟⣠⣿⣿⣿⣦⡈⢹⡇⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⢸⡟⣾⠄⠀⠀⣸⡇⣿⣿⣿⠟⠋⠛⢿⣿⣿⣿⣿⣿⡄⢻⠀⠀⠀⡇⠈⠙⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⢸⡆⠀⠀⠀⢸⡄⠀⠀⣿⣿⣇⣿⠛⠛⠻⣿⣺⣿⣿⣿⣿⣿⣿⡿⠃⠀⠀"
+echo "⠀⠀⠀⠀⠀⠀⠀⣼⢧⡇⠀⠀⠀⣿⢸⣿⣿⡿⢦⣴⣿⣿⣷⡿⣿⡿⣿⡇⢸⡄⠀⠀⢹⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⣇⠀⠀⠀⠀⣇⠀⠀⢸⣿⣟⢿⡀⠀⠀⠈⠉⠀⠉⠉⠉⠁⠀⠀⠀⠀⠀"
+
+# ================= INFO DEL SISTEMA =================
+echo
+echo "Información del sistema:"
+
+CPU_INFO=$(grep -m1 'model name' /proc/cpuinfo | cut -d ':' -f2 | sed 's/^ //')
+RAM_LIBRE=$(free -h | awk '/^Mem:/ {print $7}')
+DISK_LIBRE=$(df -h / | awk '$NF=="/" {print $4}')
+
+DISK_WRITTEN=$(awk '
+{ sum += $10 }
+END {
+  gb = sum * 512 / (1024*1024*1024)
+  if (gb >= 1024)
+    printf "%.2f TB", gb/1024
+  else
+    printf "%.2f GB", gb
+}' /proc/diskstats)
+
+UPTIME_FMT=$(awk '{
+  printf "%d days, %d hours, %d minutes",
+  int($1/86400),
+  int(($1%86400)/3600),
+  int(($1%3600)/60)
+}' /proc/uptime)
+
+echo "CPU: $CPU_INFO"
+echo "RAM libre: $RAM_LIBRE"
+echo "Espacio libre en /: $DISK_LIBRE"
+echo "Datos escritos desde el arranque: $DISK_WRITTEN"
+echo "Tiempo desde el último arranque: $UPTIME_FMT"
+
+sensors 2>/dev/null || echo "No se detectaron sensores."
+lsb_release -sd 2>/dev/null || echo "No LSB modules available."
+uname -srm
+...
+-------------------------------------------------------------------------------------------
+
+# recargo el archivo bash.bashrc
+source /etc/bash.bashrc
+
+# configuro snmp
+cp /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.ori
+vim /etc/snmp/snmpd.conf
+-------------------------------------------------------------------------------------------
+## SNMPD Configuration | Optim5s (v5) - 07/2025
+## puerto por defecto de escucha para SNMP
+agentAddress udp:161
+
+# =====[DEFINO-RED-SNMP]============================================================================================
+## permite que equipos de esa red consulten SNMP con esa comunidad
+# **rocommunity**	: Read-Only
+# **rwcommunity**	: Read-Write
+rocommunity HandShake_25 localhost
+rocommunity HandShake_25 39.1.0.0/16
+rocommunity HandShake_25 192.168.1.0/24
+
+# =====[SOBREESCRIBIR-VALORES]======================================================================================
+## sobreescribo o fuerzo OIDs existentes
+syslocation "🤖 CPD"
+syscontact "🤖 Informatica <informatica@prime.es>"
+
+# =====[DOCUMENTACIÓN-OIDS]=========================================================================================
+## OIDs importantes definidos por defecto:
+# sysObjectID: .1.3.6.1.2.1.1.2                  # Identificador único del objeto del sistema (por ejemplo, el tipo de dispositivo)
+# sysDescr: .1.3.6.1.2.1.1.1                     # Descripción del sistema (por ejemplo, el modelo y la versión del firmware)
+# sysUpTime: .1.3.6.1.2.1.1.3                    # Tiempo que el sistema ha estado funcionando desde el último reinicio
+# sysContact: .1.3.6.1.2.1.1.4                   # Información de contacto del administrador del sistema
+# sysName: .1.3.6.1.2.1.1.5                      # Nombre del sistema
+# sysLocation: .1.3.6.1.2.1.1.6                  # Ubicación física del sistema
+# sysServices: .1.3.6.1.2.1.1.7                  # Servicios disponibles en el sistema (por ejemplo, SNMP, HTTP, FTP)
+
+# =====[PERSONALIZACIÓN-RAMAS]======================================================================================
+## integrar scripts o comandos externos a SNMP
+# expone un OID personalizado que ejecuta comandos del sistema y exponen su salida
+#extend test1 /bin/echo "Hello world"
+
+# pass - expone un OID que devuelve según este ejemplo de script la temperatura del servidor
+#pass .1.3.6.1.4.1.2021.100 /usr/local/bin/check_temp.sh
+
+# pass_persist - script se ejecute una sola vez y permanezca en memoria, útil para métricas que se consultan muy seguidas
+#pass_persist .1.3.6.1.4.1.2021.101 /usr/local/bin/check_metrics_persist.sh
+
+# =====[ACCESOS-RESTRICTIVOS]=======================================================================================
+## restringe el acceso solo a esos OIDs específicos del sistema
+view systemonly included .1.3.6.1.2.1.1.1        # Descripción del sistema (sysDescr)
+view systemonly included .1.3.6.1.2.1.1.2        # Identificador único del objeto del sistema (sysObjectID)
+view systemonly included .1.3.6.1.2.1.1.6        # Ubicación física del sistema (sysLocation)
+
+# =====[PERMISOS-VISTAS]============================================================================================
+## Restringe todo el árbol MIB y limita la información expuesta, permitiendo únicamente el acceso a los OIDs definidos explícitamente en la vista (ACCESOS-RESTRICTIVOS)
+# Permitir acceso de lectura para la vista definida
+access readonly "" any noauth exact systemonly none none
+
+# Permitir acceso de lectura y escritura para la vista definida
+#access rwcommunity "" any noauth exact systemonly none none
+
+# Permitir acceso de lectura y escritura con autenticación y cifrado para la vista definida
+#access rwcommunity "" any authPriv exact all none none
+-------------------------------------------------------------------------------------------
+
+# reinicio servicio
+systemctl start snmpd
+systemctl enable snmpd
+
+# (Cron + ntpdate, actualización puntual) => para equipos de bajo rendimiento: Ejecuta ntpdate una vez al día mediante cron, sincronizando ntp. 
+apt install -y ntpsec-ntpdate
+/usr/sbin/ntpdate hora.roa.es
+echo "00 6 * * * /usr/sbin/ntpdate -s hora.roa.es" | crontab -l 2>/dev/null | grep -v 'ntpdate -s hora.roa.es' | { cat; echo "00 6 * * * /usr/sbin/ntpdate -s hora.roa.es"; } | crontab -
+   # -l = lista crontab actual
+   # 2>/dev/null = evita error si no existe crontab previo
+   # grep -v = evita duplicados
+   # cat + echo = añade nueva línea
+
+# SAR Habilitamos monitorizacion
+sed -i 's/ENABLED="false"/ENABLED="true"/g' /etc/default/sysstat
+systemctl enable sysstat
+systemctl start sysstat
+
+# Deshabilitar IPv6
+echo -e "# Deshabilitamos IPv6\nnet.ipv6.conf.all.disable_ipv6 = 1\nnet.ipv6.conf.default.disable_ipv6 = 1\nnet.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+sysctl -p
+
+  # crear archivo swap de X-GB (si es necesario)
+  sudo fallocate -l 8G /swapfile
+  sudo chmod 600 /swapfile
+  mkswap /swapfile
+  sudo swapon /swapfile
+  swapon --show
+  free -h
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Archivo iptables
+apt install iptables iptables-persistent -y
+systemctl enable netfilter-persistent
+
+# iptables v4
+vim /etc/iptables/rules.v4
+-------------------------------------------------------------------------------------------
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+# SSH
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+# Permitir HTTP (puerto 80) y HTTPS (puerto 443) si es necesario un panel web
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+# Permito web proxmox
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 8006 -j ACCEPT
+# Puertos para máquina qb-torrent
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 8096 -j ACCEPT
+# Ejemplo:: Permitimos recibir respuestas DHCP si nuestra IP es dinámica
+#-A INPUT -p udp --sport 67 --dport 68 -j ACCEPT
+#-A OUTPUT -p udp --sport 68 --dport 67 -j ACCEPT
+# Ejemplo:: Permitir acceso al panel web de administración Greenbone
+#-A INPUT -p tcp --dport 9392 -j ACCEPT
+# Cerramos resto
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+-------------------------------------------------------------------------------------------
+
+# iptables v6
+vim /etc/iptables/rules.v6
+-------------------------------------------------------------------------------------------
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p ipv6-icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+# Ejemplo:: SSH
+#-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
+# Cerramos el resto
+-A INPUT -j REJECT --reject-with icmp6-adm-prohibited
+-A FORWARD -j REJECT --reject-with icmp6-adm-prohibited
+COMMIT
+-------------------------------------------------------------------------------------------
+
+# inicio servicio
+systemctl start iptables
+systemctl start ip6tables 
+ip6tables -L -n
+systemctl restart iptables
+
+  # configuración SSH (si es necesario)
+  apt install -y openssh-server
+  # Evitar suspensión en el contenedor
+  systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+  # compruebo
+  systemctl status sleep.target suspend.target hibernate.target
+  vim /etc/ssh/sshd_config
+  -------------------------------------------------------------------------------------------
+  ...
+  Port 22
+  PermitRootLogin yes
+  AddressFamily inet
+  ListenAddress 0.0.0.0
+  ...
+  -------------------------------------------------------------------------------------------
+  
+  # Habilitar e iniciar servicio
+  systemctl enable ssh
+  systemctl start ssh
+  systemctl status ssh
+
+# Reiniciar sistema
+exec bash
+reboot now
+
+
+
+
